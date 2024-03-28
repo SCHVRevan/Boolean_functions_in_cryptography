@@ -22,6 +22,7 @@ public:
 	int get_n();
 	void Mobius();
 	void ANF();
+	int deg_calc();
 
 	friend ostream& operator << (ostream &, const BoolF &);
 	friend istream& operator >> (istream &, BoolF &);
@@ -180,15 +181,14 @@ ostream &operator << (ostream &out, const BoolF &b) {
 			for (int m = 0; m < 32; m++) {
 					out << (((1 << m) & b.f[i]) ? '1' : '0');
 			}
-			if (i == b.nw - 1) out << '\n';
-		}
+		}		
 	}
 	else {
 		for (int m = 0; m < (1 << b.n); m++) {
 			out << (((1 << m) & b.f[0]) ? '1' : '0');
 		}
-		out << '\n';
 	}
+	out << '\n';
 	return out;
 }
 
@@ -216,9 +216,10 @@ void BoolF::Mobius () {
 
 void BoolF::ANF() {
 	bool except = true;
+	int gr = min(32, (1 << n));
 	int ind = 0;
 	for (int i = 0; i < nw; i++) {
-		for (int j = 0; j < 32; j++) {
+		for (int j = 0; j < gr; j++) {
 			if (f[i] & (1 << j)) {
 				ind = (i << 5) + j;
 				if (!except) {
@@ -237,6 +238,24 @@ void BoolF::ANF() {
 	cout << '\n';
 }
 
+int BoolF::deg_calc() {
+	int deg, max_deg = 0, ind = 0, gr = min(32, (1 << n));
+	for (int i = 0; i < nw; i++) {
+		for (int j = 0; j < gr; j++) {
+			if (f[i] & (1 << j)) {
+				ind = (i << 5) + j;
+				deg = 0;
+				while (ind != 0) {
+					ind &= ind - 1;
+					deg++;
+				}
+				if (deg > max_deg) max_deg = deg;
+			}
+		}
+	}
+	return max_deg;
+}
+
 int weight_test () {
 	//srand(time(NULL));
 	BoolF a, b(2, 1), c(3, 1), d(4, 2), e(4, 2);
@@ -252,7 +271,7 @@ int weight_test () {
 
 int Mobius_test () {
 	//srand(time(NULL));
-	BoolF exmpl(3, 2);
+	BoolF exmpl(12, 2);
 	BoolF tmp(exmpl);
 
 	cout << "exmpl: " << exmpl << "\n";
@@ -276,6 +295,6 @@ int main () {
 	tmp.Mobius();
 	cout << "μ(exmpl): " << tmp;
 	tmp.ANF();
-	
+	cout << "Max degree: " << tmp.deg_calc() << '\n';
 	return 0;
 }
